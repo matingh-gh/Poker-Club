@@ -1,4 +1,5 @@
 "use client";
+import { useCountdown, formatHMS } from "@/lib/useCountdown";
 import { useRouter } from "next/navigation";
 import { useCountdown } from "@/lib/useCountdown";
 
@@ -24,7 +25,41 @@ type Tx = { id: string; session_id: string; player_id: string; kind: TxKind; amo
 
 export default function SessionClient({ id }: { id: string }) {
   
+  
   const router = useRouter();
+
+  const durationMs =
+    (typeof session !== "undefined" && session?.duration_min != null
+      ? session.duration_min
+      : 180) * 60000;
+
+  const startedAtMs =
+    typeof session !== "undefined" && session?.started_at
+      ? new Date(session.started_at).getTime()
+      : Date.now();
+
+  const { remainingMs, status, pause, resume, setStatus } = useCountdown({
+    startedAt: startedAtMs,
+    durationMs,
+    initialStatus:
+      (typeof session !== "undefined" && (session as any)?.status) ?? "running",
+  });
+
+  const onPause = async () => {
+    try { if (typeof pauseSessionInDb === "function") await (pauseSessionInDb)(id); }
+    finally { pause(); setStatus("paused"); }
+  };
+
+  const onResume = async () => {
+    try { if (typeof resumeSessionInDb === "function") await (resumeSessionInDb)(id); }
+    finally { resume(); setStatus("running"); }
+  };
+
+  const finishSessionAndGo = async () => {
+    try { if (typeof finishSessionInDb === "function") await (finishSessionInDb)(id); }
+    finally { try { router.push(`/sessions/${id}/settlements`); } catch (e) {} }
+  };
+const router = useRouter();
 
   const durationMs =
     (typeof session !== "undefined" && session?.duration_min != null
