@@ -1,0 +1,382 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+type SessionRow = {
+  id: string;
+  title: string | null;
+  type: "tournament" | "cashgame";
+  buy_in: number;
+  status: "active" | "finished" | "paused";
+  started_at: string | null;
+  ended_at: string | null;
+  blind_level_minutes: number | null;
+  duration_minutes: number | null;
+};
+
+type Player = { id: string; name: string };
+type SP = { id: string; player_id: string };
+type TxKind = "buyin" | "rebuy" | "cashout";
+type Tx = { id: string; session_id: string; player_id: string; kind: TxKind; amount: number; created_at: string };
+
+export default function SessionClient({ id }: { id: string }) {
+  const [session, setSession] = useState<SessionRow | null>(null);
+  const [players, setPlayers] = useState<(Player & { spId: string })[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [txs, setTxs] = useState<Tx[]>([]);
+  const [running, setRunning] = useState(true);     // Pause/Resume
+  const [tick, setTick] = useState(0);
+  const [msg, setMsg] = useState("");
+
+  // تاریخچه‌ی Blind برای tournament: { 10: 2, 20: 1, ... }
+  const prevLevelIndexRef = useRef<number | null>(null);
+  const blindHistoryRef = useRef<Record<number, number>>({});
+
+  const isFinished = session?.status === "finished";
+
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase.from("sessions").select("*").eq("id", id).single();
+      if (s) setSession(s);
+
+      const { data: sp } = await supabase.from("session_players").select("id,player_id").eq("session_id", id);
+      const pids = (sp ?? []).map((r: SP) => r.player_id);
+      const { data: ps } = await supabase.from("players").select("*").in("id", pids);
+      const merged = (sp ?? []).map((r: SP) => ({ spId: r.id, ...(ps ?? []).find(p => p.id === r.player_id)! }));
+      setPlayers(merged);
+
+      const { data: aps } = await supabase.from("players").select("*");
+      setAllPlayers(uniqBy(aps ?? [], p => (p.name ?? "").trim().toLowerCase()));
+
+      await reloadTxs();
+    })();
+  }, [id]);
+
+  // تیک هر ثانیه وقتی running=true و session شروع شده
+  useEffect(() => {
+    if (!running || !session?.started_at || isFinished) return;
+    const timer = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(timer);
+  }, [running, session?.started_at, isFinished]);
+
+  // Countdown ها
+  const { tournamentCountdown, cashgameCountdown, levelIndex } = useMemo(() => {
+    if (!session || !session.started_at) return { tournamentCountdown: null, cashgameCountdown: null, levelIndex: null as number | null };
+    const start = new Date(session.started_at).getTime();
+    const elapsed = Math.max(0, Date.now() - start);
+
+    let tournamentCountdown: string | null = null;
+    let cashgameCountdown: string | null = null;
+    let levelIndex: number | null = null;
+
+    if (session.type === "tournament") {
+      const L = (session.blind_level_minutes ?? 10) * 60 * 1000;
+      if (L > 0) {
+        const left = L - (elapsed % L);
+        levelIndex = Math.floor(elapsed / L);
+        tournamentCountdown = formatHMS(Math.floor(left / 1000));
+      }
+    } else {
+      const D = (session.duration_minutes ?? 0) * 60 * 1000;
+      if (D > 0) {
+        const left = Math.max(0, D - elapsed);
+        cashgameCountdown = formatHMS(Math.floor(left / 1000));
+      }
+    }
+    return { tournamentCountdown, cashgameCountdown, levelIndex };
+  }, [session, tick]);
+
+  // ثبت تاریخچه‌ی blind وقتی level عوض می‌شود
+  useEffect(() => {
+    if (session?.type !== "tournament") return;
+    if (levelIndex == null) return;
+    const prev = prevLevelIndexRef.current;
+    if (prev == null) { prevLevelIndexRef.current = levelIndex; return; }
+    if (levelIndex !== prev) {
+      prevLevelIndexRef.current = levelIndex;
+      const mins = session?.blind_level_minutes ?? 10;
+      blindHistoryRef.current[mins] = (blindHistoryRef.current[mins] ?? 0) + 1;
+    }
+  }, [levelIndex, session?.type, session?.blind_level_minutes]);
+
+  // خلاصه‌ی تراکنش‌ها: buyin/‌rebuy منفی و cashout مثبت
+  const perPlayer = useMemo(() => {
+    const map = new Map<string, { buy: number; buyCount: number; re: number; reCount: number; out: number }>();
+    for (const p of players) map.set(p.id, { buy: 0, buyCount: 0, re: 0, reCount: 0, out: 0 });
+    for (const tx of txs) {
+      const r = map.get(tx.player_id);
+      if (!r) continue;
+      if (tx.kind === "buyin") { r.buy += -Math.abs(tx.amount); r.buyCount++; }   // منفی
+      if (tx.kind === "rebuy") { r.re  += -Math.abs(tx.amount); r.reCount++; }    // منفی
+      if (tx.kind === "cashout") { r.out += Math.abs(tx.amount); }                // مثبت
+    }
+    return map;
+  }, [players, txs]);
+
+  const addablePlayers = useMemo(() => {
+    const inSet = new Set(players.map(p => p.id));
+    return allPlayers.filter(p => !inSet.has(p.id));
+  }, [allPlayers, players]);
+
+  async function reloadTxs() {
+    const { data: t } = await supabase.from("transactions").select("*").eq("session_id", id).order("created_at", { ascending: true });
+    setTxs(t ?? []);
+  }
+
+  // تراکنش‌ها
+  async function buyinFixed(playerId: string) {
+    if (!session) return;
+    const amount = Math.abs(session.buy_in);
+    const { error } = await supabase.from("transactions").insert({ session_id: session.id, player_id: playerId, kind: "buyin", amount });
+    if (error) return alert(error.message);
+    await reloadTxs();
+    flash("✅ Buy-in ثبت شد");
+  }
+
+  async function rebuyPrompt(playerId: string) {
+    if (!session) return;
+    const raw = prompt("Rebuy amount:", String(session.buy_in));
+    if (raw == null) return;
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n <= 0) return alert("Invalid amount");
+    const { error } = await supabase.from("transactions").insert({ session_id: session.id, player_id: playerId, kind: "rebuy", amount: Math.abs(n) });
+    if (error) return alert(error.message);
+    await reloadTxs();
+    flash("✅ Rebuy ثبت شد");
+  }
+
+  async function cashoutPrompt(playerId: string) {
+    const raw = prompt("Final chips (cashout) amount:");
+    if (raw == null) return;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return alert("Invalid amount");
+    const { error } = await supabase.from("transactions").insert({ session_id: id, player_id: playerId, kind: "cashout", amount: Math.abs(n) });
+    if (error) return alert(error.message);
+    await reloadTxs();
+    flash("✅ Cashout ثبت شد");
+  }
+
+  // حذف بازیکن از این سشن
+  async function removePlayer(spId: string) {
+    if (!confirm("Remove player from session?")) return;
+    await supabase.from("session_players").delete().eq("id", spId);
+    setPlayers(prev => prev.filter(p => p.spId !== spId));
+  }
+
+  // + / − Blind (فقط tournament)
+  async function bumpBlind(delta: number) {
+    if (!session || session.type !== "tournament" || isFinished) return;
+    const next = Math.max(1, (session.blind_level_minutes ?? 10) + delta);
+    const { data, error } = await supabase.from("sessions").update({ blind_level_minutes: next }).eq("id", session.id).select().single();
+    if (error) return alert(error.message);
+    setSession(data);
+  }
+
+  function toggleRunning() {
+    if (isFinished) return;
+    setRunning(v => !v);
+  }
+
+  // محاسبه‌ی Net هر بازیکن: out - (|buy| + |rebuy|)
+  function computeNets() {
+    const nets: { player_id: string; name: string; net: number }[] = [];
+    for (const p of players) {
+      const r = perPlayer.get(p.id);
+      const buy = Math.abs(r?.buy ?? 0);
+      const re  = Math.abs(r?.re  ?? 0);
+      const out = Math.abs(r?.out ?? 0);
+      const net = out - (buy + re);
+      nets.push({ player_id: p.id, name: p.name, net });
+    }
+    return nets;
+  }
+
+  // تولید تسویه‌ی نفر-به-نفر (Greedy)
+  function makeSettlements(nets: { player_id: string; net: number }[]) {
+    const debtors  = nets.filter(n => n.net < 0).map(n => ({ ...n, amount: -n.net })); // بدهکار باید بپردازد
+    const creditors= nets.filter(n => n.net > 0).map(n => ({ ...n, amount:  n.net })); // طلبکار باید بگیرد
+    const result: { from_player_id: string; to_player_id: string; amount: number }[] = [];
+    let i=0, j=0;
+    while (i < debtors.length && j < creditors.length) {
+      const pay = Math.min(debtors[i].amount, creditors[j].amount);
+      result.push({ from_player_id: debtors[i].player_id, to_player_id: creditors[j].player_id, amount: round2(pay) });
+      debtors[i].amount  = round2(debtors[i].amount  - pay);
+      creditors[j].amount= round2(creditors[j].amount- pay);
+      if (debtors[i].amount <= 0.0001) i++;
+      if (creditors[j].amount <= 0.0001) j++;
+    }
+    return result;
+  }
+
+  // Finish: نت‌ها + settlements + results ذخیره، سپس قفل جلسه
+  async function finishSession() {
+    if (!session) return;
+    if (!confirm("Finish this session and write settlements?")) return;
+
+    const nets = computeNets();
+
+    // 1) settlements
+    const stmts = makeSettlements(nets);
+    if (stmts.length) {
+      const rows = stmts.map(s => ({ ...s, session_id: session.id }));
+      const { error: e1 } = await supabase.from("settlements").insert(rows);
+      if (e1) return alert(e1.message);
+    }
+
+    // 2) results برای رنکینگ
+    // برای tournament: position بر اساس net (بیشتر = رتبه‌ی بهتر). برای cashgame position=null
+    const sorted = [...nets].sort((a, b) => b.net - a.net);
+    const rowsRes = sorted.map((n, idx) => ({
+      session_id: session.id,
+      player_id: n.player_id,
+      net: round2(n.net),
+      position: session.type === "tournament" ? idx + 1 : null
+    }));
+    if (rowsRes.length) {
+      const { error: e2 } = await supabase.from("results").insert(rowsRes);
+      if (e2) return alert(e2.message);
+    }
+
+    // 3) بستن جلسه
+    const { data, error } = await supabase
+      .from("sessions")
+      .update({ status: "finished", ended_at: new Date().toISOString() })
+      .eq("id", session.id)
+      .select()
+      .single();
+
+    if (error) return alert(error.message);
+    setSession(data);
+    setRunning(false);
+    flash("✅ Session finished. Settlements written.");
+  }
+
+  const blindHistoryText = useMemo(() => {
+    const entries = Object.entries(blindHistoryRef.current);
+    if (entries.length === 0) return "—";
+    return entries
+      .sort(([a],[b]) => Number(a) - Number(b))
+      .map(([m,c]) => `${c} × ${m}m`)
+      .join(" , ");
+  }, [tick]);
+
+  return (
+    <main className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-xl font-bold mb-1">
+        {session?.title ?? "(untitled)"} <span className="text-sm opacity-70">@ {session?.type}</span>
+      </h1>
+      <div className="text-sm opacity-80 mb-3">
+        Status: <b>{session?.status}</b> | Buy-in: <b>{session?.buy_in}</b>
+      </div>
+
+      {session?.type === "tournament" && (
+        <div className="mb-3 flex items-center gap-3">
+          <div>Blind up in: <b>{tournamentCountdown ?? "--:--"}</b></div>
+          <div>Blind level (min): <b>{session?.blind_level_minutes ?? 10}</b></div>
+          <button onClick={() => bumpBlind(+1)} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">＋</button>
+          <button onClick={() => bumpBlind(-1)} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">－</button>
+          <button onClick={toggleRunning} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">{running ? "Pause" : "Resume"}</button>
+        </div>
+      )}
+
+      {session?.type === "cashgame" && (
+        <div className="mb-3 flex items-center gap-3">
+          <div>Time left: <b>{cashgameCountdown ?? "--:--"}</b></div>
+          <div>Duration (min): <b>{session?.duration_minutes ?? 0}</b></div>
+          <button onClick={toggleRunning} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">{running ? "Pause" : "Resume"}</button>
+        </div>
+      )}
+
+      {session?.type === "tournament" && (
+        <div className="mb-4 text-sm opacity-80">Blind history: {blindHistoryText}</div>
+      )}
+
+      <h2 className="font-semibold mb-2">Players</h2>
+      <ul className="space-y-3 mb-6">
+        {players.map(p => {
+          const r = perPlayer.get(p.id);
+          const buy = r?.buy ?? 0;       // already negative
+          const re  = r?.re  ?? 0;       // negative
+          const out = r?.out ?? 0;       // positive
+          const net = round2(out + buy + re);
+          return (
+            <li key={p.id} className="border rounded p-3">
+              <div className="flex items-center justify-between">
+                <div className="font-medium">{p.name}</div>
+                <div className="flex items-center gap-2">
+                  <button disabled={isFinished} onClick={() => buyinFixed(p.id)}   className="bg-green-600 px-3 py-1 rounded">Buy-in</button>
+                  <button disabled={isFinished} onClick={() => rebuyPrompt(p.id)}  className="bg-blue-600  px-3 py-1 rounded">Rebuy</button>
+                  <button disabled={isFinished} onClick={() => cashoutPrompt(p.id)} className="bg-red-600   px-3 py-1 rounded">Cashout</button>
+                  <button disabled={isFinished} onClick={() => removePlayer(p.spId)} className="px-2 py-1 rounded bg-neutral-700" title="Remove">🗑️</button>
+                </div>
+              </div>
+              <div className="text-xs opacity-80 mt-2">
+                Buy-ins: {Math.abs(buy)} {buy !== 0 ? "(-)" : ""} · Rebuy: {Math.abs(re)} {re !== 0 ? "(-)" : ""} · Cashout: {out} {(out!==0) ? "(+)" : ""} · <b>Net: {net >=0 ? `+${net}` : `${net}`}</b>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      <h3 className="font-semibold mb-2">Add Player</h3>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {addablePlayers.map(p => (
+          <button
+            key={p.id}
+            disabled={isFinished}
+            onClick={async () => {
+              const { data, error } = await supabase.from("session_players").insert({ session_id: id, player_id: p.id, starting_stack: 0 }).select().single();
+              if (!error && data) setPlayers(prev => [...prev, { spId: data.id, ...p }]);
+            }}
+            className="px-3 py-1 rounded border"
+          >
+            {p.name}
+          </button>
+        ))}
+        {addablePlayers.length === 0 && <span className="opacity-70 text-sm">No more players to add.</span>}
+      </div>
+
+      {msg && <div className="text-green-400 text-sm mb-3">{msg}</div>}
+      <button disabled={isFinished} onClick={finishSession} className="px-4 py-2 rounded bg-neutral-700">Finish Session</button>
+    </main>
+  );
+}
+
+function uniqBy<T>(arr: T[], key: (t: T) => string | number | undefined) {
+  const seen = new Set<string | number>();
+  const out: T[] = [];
+  for (const x of arr) {
+    const k = key(x);
+    if (k == null) continue;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(x);
+  }
+  return out;
+}
+
+function formatHMS(sec: number) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return `${h ? String(h).padStart(2,"0")+":" : ""}${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+function round2(n: number){ return Math.round(n*100)/100; }
+
+function flash(txt: string) {
+  if (typeof window === "undefined") return;
+  const e = document.createElement("div");
+  e.textContent = txt;
+  e.style.position = "fixed";
+  e.style.bottom = "16px";
+  e.style.left = "50%";
+  e.style.transform = "translateX(-50%)";
+  e.style.background = "#111";
+  e.style.color = "#0f0";
+  e.style.padding = "6px 10px";
+  e.style.borderRadius = "8px";
+  e.style.zIndex = "9999";
+  document.body.appendChild(e);
+  setTimeout(() => e.remove(), 1500);
+}
