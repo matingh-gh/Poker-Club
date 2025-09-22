@@ -1,9 +1,8 @@
 import SessionClient from "./SessionClient";
-import type { PageProps } from "next";
 
 export default async function Page(
-  { params }: PageProps<{ id: string }>
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id } = await params; // Next.js 15: params یک Promise است
   return <SessionClient id={id} />;
 }
