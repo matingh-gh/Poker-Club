@@ -23,9 +23,11 @@ type TxKind = "buyin" | "rebuy" | "cashout";
 type Tx = { id: string; session_id: string; player_id: string; kind: TxKind; amount: number; created_at: string };
 
 export default function SessionClient({ id }: { id: string }) {
+  
+  
+  const router = useRouter();
 
-    const router = useRouter();
-const durationMs =
+  const durationMs =
     (typeof session !== "undefined" && session?.duration_min != null
       ? session.duration_min
       : 180) * 60000;
@@ -56,6 +58,7 @@ const durationMs =
     try { if (typeof finishSessionInDb === "function") await (finishSessionInDb)(id); }
     finally { try { router.push(`/sessions/${id}/settlements`); } catch (e) {} }
   };
+const router = useRouter();
 
   const durationMs =
     (typeof session !== "undefined" && session?.duration_min != null
