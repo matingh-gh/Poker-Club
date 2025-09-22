@@ -1,5 +1,9 @@
 import SessionClient from "./SessionClient";
+import type { PageProps } from "next";
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <SessionClient id={params.id} />;
+export default async function Page(
+  { params }: PageProps<{ id: string }>
+) {
+  const { id } = await params;
+  return <SessionClient id={id} />;
 }

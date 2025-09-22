@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    // باعث می‌شود خطاهای ESLint بیلد را در Vercel متوقف نکنند
-    ignoreDuringBuilds: true,
-  },
+  eslint: { ignoreDuringBuilds: true },
+  // typescript.ignoreBuildErrors دیگه اینجا نیست
 };
 
 export default nextConfig;
