@@ -1,22 +1,9 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-
 export default function Home() {
-  const [status, setStatus] = useState('checking...')
-
-  useEffect(() => {
-    if (supabase) setStatus('✅ Connected to Supabase')
-    else setStatus('❌ Connection failed')
-  }, [])
-
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-3">Poker App</h1>
-        <p>{status}</p>
-      </div>
-    </main>
-  )
+    <section className="flex flex-col items-center gap-3 py-24 text-center">
+      <h1 className="text-3xl font-semibold">Poker App</h1>
+      <p className="text-sm text-green-400">✅ Connected to Supabase</p>
+      <p className="opacity-80">از منوی بالا صفحات را باز کن.</p>
+    </section>
+  );
 }
