@@ -37,13 +37,12 @@ export default function SessionClient({ id }: { id: string }) {
       ? new Date(session.started_at).getTime()
       : Date.now());
 
-  
   const { remainingMs, status, pause, resume, setStatus } = useCountdown({
     startedAt: startedAtMs,
     durationMs,
-    initialStatus: (typeof session !== "undefined" && (session as any)?.status) ?? "running",
+    initialStatus:
+      (typeof session !== "undefined" && (session as any)?.status) ?? "running",
   });
-
 (typeof session !== "undefined" && session?.duration_min != null
       ? session.duration_min
       : 180) * 60000;
