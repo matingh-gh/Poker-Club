@@ -38,12 +38,32 @@ export default function SessionClient({ id }: { id: string }) {
       ? new Date(session.started_at).getTime()
       : Date.now());
 
-  
-const { remainingMs, status, pause, resume, setStatus } = useCountdown({
-  startedAt: startedAtMs,
-  durationMs,
-  initialStatus: (typeof session !== "undefined" && (session as any)?.status) ?? "running",
-});
+  const { remainingMs, status, pause, resume, setStatus } = useCountdown({
+    startedAt: startedAtMs,
+    durationMs,
+    initialStatus: (typeof session !== "undefined" && (session as any)?.status) ?? "running",
+
+const onPause = async () => {
+    try { if (typeof pauseSessionInDb === "function") await (pauseSessionInDb)(id); }
+    finally { pause(); setStatus("paused"); }
+  };
+
+  const onResume = async () => {
+    try { if (typeof resumeSessionInDb === "function") await (resumeSessionInDb)(id); }
+    finally { resume(); setStatus("running"); }
+  };
+
+  const finishSessionAndGo = async () => {
+    try { if (typeof finishSessionInDb === "function") await (finishSessionInDb)(id); }
+    finally { try { router.push(`/sessions/${id}/settlements`); } catch (e) {} }
+  };
+
+    (typeof session !== "undefined" && session?.duration_min != null
+      ? session.duration_min
+      : 180) * 60000;
+      ? new Date(session.started_at).getTime()
+      : Date.now();
+  });
 const [session, setSession] = useState<SessionRow | null>(null);
   const [players, setPlayers] = useState<(Player & { spId: string })[]>([]);
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
