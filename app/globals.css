@@ -24,3 +24,19 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* --- Mobile utilities --- */
+@layer utilities {
+  .stack-sm{ @apply flex flex-col gap-3 sm:flex-row sm:items-center; }
+  .btn-row-3{ @apply grid grid-cols-3 gap-2 sm:flex sm:flex-row; }
+  .btn-resp{ @apply w-full sm:w-auto px-3 py-2 text-sm sm:text-base rounded-lg; }
+  .player-card{ @apply relative rounded-2xl border border-white/10 bg-white/5 p-4 shadow; }
+}
+/* === poker-app mobile utilities (do not remove) === */
+@layer utilities {
+  .stack-sm{ @apply flex flex-col gap-3 sm:flex-row sm:items-center; }
+  .btn-row-3{ @apply grid grid-cols-3 gap-2 sm:flex sm:flex-row; }
+  .btn-resp{ @apply w-full sm:w-auto px-3 py-2 text-sm sm:text-base rounded-lg; }
+  .player-card{ @apply relative rounded-2xl border border-white/10 bg-white/5 p-4 shadow; }
+}
+/* === end poker-app mobile utilities === */
