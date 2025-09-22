@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useCountdown, formatHMS } from "@/lib/useCountdown";
+import { useCountdown } from "@/lib/useCountdown";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
