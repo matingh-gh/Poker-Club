@@ -25,12 +25,12 @@ type Tx = { id: string; session_id: string; player_id: string; kind: TxKind; amo
 export default function SessionClient({ id }: { id: string }) {
 
     const router = useRouter();
-  const durationMs = (typeof session !== "undefined" && session?.duration_min != null ? session.duration_min : 180) * 60000;
+const durationMs =
     (typeof session !== "undefined" && session?.duration_min != null
       ? session.duration_min
       : 180) * 60000;
 
-  const startedAtMs = (typeof session !== "undefined" && session?.started_at ? new Date(session.started_at).getTime() : Date.now());
+  const startedAtMs =
     typeof session !== "undefined" && session?.started_at
       ? new Date(session.started_at).getTime()
       : Date.now();
@@ -57,14 +57,17 @@ export default function SessionClient({ id }: { id: string }) {
     finally { try { router.push(`/sessions/${id}/settlements`); } catch (e) {} }
   };
 
+  const durationMs =
     (typeof session !== "undefined" && session?.duration_min != null
       ? session.duration_min
       : 180) * 60000;
 
+  const startedAtMs =
     typeof session !== "undefined" && session?.started_at
       ? new Date(session.started_at).getTime()
       : Date.now();
 
+  const { remainingMs, status, pause, resume, setStatus } = useCountdown({
     startedAt: startedAtMs,
     durationMs,
     initialStatus:
