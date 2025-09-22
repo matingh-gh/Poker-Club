@@ -25,7 +25,6 @@ type Tx = { id: string; session_id: string; player_id: string; kind: TxKind; amo
 export default function SessionClient({ id }: { id: string }) {
 
     
-  
   const router = useRouter();
 
   const durationMs =
@@ -43,7 +42,35 @@ export default function SessionClient({ id }: { id: string }) {
     durationMs,
     initialStatus: (typeof session !== "undefined" && (session as any)?.status) ?? "running",
   });
-const onPause = async () => {
+(typeof session !== "undefined" && session?.duration_min != null
+      ? session.duration_min
+      : 180) * 60000;
+
+    (typeof session !== "undefined" && session?.started_at
+      ? new Date(session.started_at).getTime()
+      : Date.now());
+
+  (typeof session !== "undefined" && session?.duration_min != null
+      ? session.duration_min
+      : 180) * 60000;
+
+    (typeof session !== "undefined" && session?.started_at
+      ? new Date(session.started_at).getTime()
+      : Date.now());
+
+  
+  (typeof session !== "undefined" && session?.duration_min != null
+      ? session.duration_min
+      : 180) * 60000;
+
+    typeof session !== "undefined" && session?.started_at
+      ? new Date(session.started_at).getTime()
+      : Date.now();
+
+      (typeof session !== "undefined" && (session as any)?.status) ?? "running",
+  });
+
+  const onPause = async () => {
     try { if (typeof pauseSessionInDb === "function") await (pauseSessionInDb)(id); }
     finally { pause(); setStatus("paused"); }
   };
@@ -91,7 +118,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
   const [tick, setTick] = useState(0);
   const [msg, setMsg] = useState("");
 
-  // تاریخچهی Blind برای tournament: { 10: 2, 20: 1, ... }
+  // تاریخچه‌ی Blind برای tournament: { 10: 2, 20: 1, ... }
   const prevLevelIndexRef = useRef<number | null>(null);
   const blindHistoryRef = useRef<Record<number, number>>({});
 
@@ -149,7 +176,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     return { tournamentCountdown, cashgameCountdown, levelIndex };
   }, [session, tick]);
 
-  // ثبت تاریخچهی blind وقتی level عوض میشود
+  // ثبت تاریخچه‌ی blind وقتی level عوض می‌شود
   useEffect(() => {
     if (session?.type !== "tournament") return;
     if (levelIndex == null) return;
@@ -162,7 +189,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     }
   }, [levelIndex, session?.type, session?.blind_level_minutes]);
 
-  // خلاصهی تراکنشها: buyin/rebuy منفی و cashout مثبت
+  // خلاصه‌ی تراکنش‌ها: buyin/‌rebuy منفی و cashout مثبت
   const perPlayer = useMemo(() => {
     const map = new Map<string, { buy: number; buyCount: number; re: number; reCount: number; out: number }>();
     for (const p of players) map.set(p.id, { buy: 0, buyCount: 0, re: 0, reCount: 0, out: 0 });
@@ -186,7 +213,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     setTxs(t ?? []);
   }
 
-  // تراکنشها
+  // تراکنش‌ها
   async function buyinFixed(playerId: string) {
     if (!session) return;
     const amount = Math.abs(session.buy_in);
@@ -240,7 +267,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     setRunning(v => !v);
   }
 
-  // محاسبهی Net هر بازیکن: out - (|buy| + |rebuy|)
+  // محاسبه‌ی Net هر بازیکن: out - (|buy| + |rebuy|)
   function computeNets() {
     const nets: { player_id: string; name: string; net: number }[] = [];
     for (const p of players) {
@@ -254,7 +281,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     return nets;
   }
 
-  // تولید تسویهی نفر-به-نفر (Greedy)
+  // تولید تسویه‌ی نفر-به-نفر (Greedy)
   function makeSettlements(nets: { player_id: string; net: number }[]) {
     const debtors  = nets.filter(n => n.net < 0).map(n => ({ ...n, amount: -n.net })); // بدهکار باید بپردازد
     const creditors= nets.filter(n => n.net > 0).map(n => ({ ...n, amount:  n.net })); // طلبکار باید بگیرد
@@ -271,7 +298,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     return result;
   }
 
-  // Finish: نتها + settlements + results ذخیره، سپس قفل جلسه
+  // Finish: نت‌ها + settlements + results ذخیره، سپس قفل جلسه
   async function finishSession() {
     if (!session) return;
     if (!confirm("Finish this session and write settlements?")) return;
@@ -287,7 +314,7 @@ const [session, setSession] = useState<SessionRow | null>(null);
     }
 
     // 2) results برای رنکینگ
-    // برای tournament: position بر اساس net (بیشتر = رتبهی بهتر). برای cashgame position=null
+    // برای tournament: position بر اساس net (بیشتر = رتبه‌ی بهتر). برای cashgame position=null
     const sorted = [...nets].sort((a, b) => b.net - a.net);
     const rowsRes = sorted.map((n, idx) => ({
       session_id: session.id,
