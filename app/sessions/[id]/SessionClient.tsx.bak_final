@@ -50,14 +50,6 @@ export default function SessionClient({ id }: { id: string }) {
       ? new Date(session.started_at).getTime()
       : Date.now());
 
-  (typeof session !== "undefined" && session?.duration_min != null
-      ? session.duration_min
-      : 180) * 60000;
-
-    (typeof session !== "undefined" && session?.started_at
-      ? new Date(session.started_at).getTime()
-      : Date.now());
-
   
   (typeof session !== "undefined" && session?.duration_min != null
       ? session.duration_min
@@ -67,6 +59,9 @@ export default function SessionClient({ id }: { id: string }) {
       ? new Date(session.started_at).getTime()
       : Date.now();
 
+    startedAt: startedAtMs,
+    durationMs,
+    initialStatus:
       (typeof session !== "undefined" && (session as any)?.status) ?? "running",
   });
 
@@ -93,6 +88,9 @@ export default function SessionClient({ id }: { id: string }) {
       ? new Date(session.started_at).getTime()
       : Date.now();
 
+    startedAt: startedAtMs,
+    durationMs,
+    initialStatus:
       (typeof session !== "undefined" && (session as any)?.status) ?? "running",
   });
 
