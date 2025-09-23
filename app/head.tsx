@@ -5,7 +5,7 @@ export default function Head() {
 
       {/* PWA basics */}
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-      <link rel="manifest" href="/manifest.webmanifest" />
+      <link rel="manifest" href="/manifest.webmanifest?v=20250923-1" />
 
       {/* iOS standalone */}
       <meta name="apple-mobile-web-app-capable" content="yes" />
