@@ -187,9 +187,10 @@ export default function NewSessionPage() {
               return (
                 <button
                   type="button"
+                  type="button"
                   key={p.id}
                   onClick={() => toggle(p.id)}
-                  className={`px-3 py-1 rounded border ${selected ? 'bg-white text-black' : ''}`}
+                  aria-pressed={selected} className="px-3 py-1 rounded border"
                 >
                   {p.name}
                 </button>
