@@ -278,3 +278,64 @@ button.selected, .chip.is-selected {
 button[disabled], button[aria-disabled="true"]{
   opacity: .6;
 }
+
+/* === Mobile Icon Sizing (global, CSS-only) === */
+:root{
+  --icon-size: 18px;     /* default */
+  --icon-btn: 40px;      /* default square button (icon-only) */
+  --icon-radius: 12px;
+}
+@media (max-width: 420px){
+  :root{
+    --icon-size: 16px;   /* smaller icons on small phones */
+    --icon-btn: 36px;    /* smaller square */
+  }
+}
+
+/* اندازه‌ی خودِ آیکن‌ها (هر SVG یا .icon داخل دکمه‌ها) */
+button svg,
+button .icon{
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+/* دکمه‌های «فقط آیکن» (بدون متن) — auto-detect با :has */
+/* Safari iOS از :has پشتیبانی می‌کند */
+button[aria-label],
+button[title],
+button:has(svg):not(:has(span, .label, .text)){
+  width: var(--icon-btn);
+  height: var(--icon-btn);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--icon-radius);
+}
+
+/* نمونهٔ رایج: دکمه‌های حذف/سطل */
+button[title*="Delete"],
+button[aria-label*="Delete"]{
+  width: var(--icon-btn);
+  height: var(--icon-btn);
+}
+
+/* فاصله‌های کناری آیکن‌ها وقتی داخل ردیف کارت هستند */
+.row button[aria-label],
+.row button[title],
+.row button:has(svg):not(:has(span, .label, .text)){
+  margin-left: .25rem;
+}
+
+/* اگر آیکن‌ها داخل لینک‌ها هم بودند */
+a:has(svg) > svg { width: var(--icon-size); height: var(--icon-size); }
+
+/* جلوگیری از «از کادر زدن بیرون» در کارت‌های موبایل */
+@media (max-width: 420px){
+  .row{
+    padding: 12px;
+  }
+  .row > *{
+    min-width: 0;  /* اجازهٔ جمع شدن آیتم‌ها */
+  }
+}
