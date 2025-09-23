@@ -187,10 +187,9 @@ export default function NewSessionPage() {
               return (
                 <button
                   type="button"
-                  type="button"
                   key={p.id}
                   onClick={() => toggle(p.id)}
-                  aria-pressed={selected} className="px-3 py-1 rounded border"
+                  aria-pressed={selected} data-selected={selected} className="px-3 py-1 rounded border"
                 >
                   {p.name}
                 </button>
