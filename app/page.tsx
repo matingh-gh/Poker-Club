@@ -5,6 +5,10 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-0 opacity-30 [background:radial-gradient(60%_40%_at_50%_20%,_#22c55e_0%,_transparent_60%)]" />
       <div className="relative mx-auto max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-10 shadow-2xl backdrop-blur">
         <h1 className="text-4xl font-semibold tracking-tight">Welcome to Poker App</h1>
+  <div id="home-cta" className="mt-6">
+    <a href="/sessions/new" className="btn btn-primary">Create Session</a>
+  </div>
+
         <p className="mt-3 text-base text-white/80">
           Track your home games like a pro—create sessions, add players, and see live rankings.
         </p>
