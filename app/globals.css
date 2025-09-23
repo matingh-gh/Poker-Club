@@ -1,3 +1,6 @@
+/* UI font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
 :root {
@@ -171,3 +174,71 @@ body{
 
 /* Tiny muted label */
 .label-muted{ color: var(--muted); font-size:.9rem; }
+
+/* === UI base element styles (global) === */
+* { box-sizing: border-box; }
+
+:root { color-scheme: dark; }
+
+body {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  line-height: 1.45;
+}
+
+h1, h2, h3 { letter-spacing: -0.01em; }
+h1 { font-weight: 700; font-size: clamp(1.6rem, 3.8vw, 2.25rem); }
+h2 { font-weight: 700; font-size: clamp(1.3rem, 3vw, 1.6rem); }
+h3 { font-weight: 600; font-size: clamp(1.1rem, 2.2vw, 1.25rem); }
+
+a {
+  color: var(--text);
+  text-decoration: none;
+}
+a:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Buttons — اعمال روی همهٔ <button> ها */
+button {
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.5rem; padding:.55rem 1rem;
+  border-radius: var(--radius-sm);
+  border:1px solid var(--border);
+  background: var(--surface);
+  color:#fff; font-weight:600; line-height:1;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+button:hover { border-color: rgba(255,255,255,0.14); }
+button:active { transform: translateY(1px); }
+
+/* Inputs */
+input[type="text"], input[type="number"], input[type="time"], select, textarea {
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding:10px 12px; color: var(--text); outline:none;
+}
+input::placeholder, textarea::placeholder { color: var(--muted); }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* Tables (Ranking) */
+table {
+  width:100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+th, td { padding:10px 12px; border-bottom:1px solid var(--border); }
+th { text-align:left; background: rgba(255,255,255,0.02); font-weight:600; }
+tr:last-child td { border-bottom: 0; }
+
+/* Utility for numbers */
+.tabular-nums { font-variant-numeric: tabular-nums; }
