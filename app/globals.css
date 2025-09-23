@@ -369,3 +369,66 @@ a:has(svg) > svg { width: var(--icon-size); height: var(--icon-size); }
   width: 16px;
   height: 16px;
 }
+
+/* === Player Card layout v2 (grid actions) === */
+.row {
+  position: relative;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  padding: 14px 16px;
+}
+
+/* ردیف دکمه‌ها: ظرفی که دقیقا 3 دکمه داخلش دارد را پیدا کن و سه‌ستونه کن */
+.row > :has(> button + button + button) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .6rem;
+  padding-right: 64px; /* جا برای دکمهٔ سطل سمت راست */
+  align-items: center;
+  margin-bottom: .6rem;
+}
+
+/* خود دکمه‌ها در آن ردیف */
+.row > :has(> button + button + button) > button {
+  width: 100%;
+  justify-content: center;
+  white-space: nowrap;
+  word-break: keep-all;
+  hyphens: none;
+  min-height: 40px;
+  border-radius: 14px;
+  padding: .5rem .8rem;
+  font-weight: 600;
+}
+
+/* آیکن سطل (دکمهٔ فقط‌آیکن) ثابت در راستای کارت */
+.row button[title*="Delete"],
+.row button[aria-label*="Delete"],
+.row button:has(svg[aria-hidden="true"]) {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  width: 40px; height: 40px; padding: 0;
+  border-radius: 12px;
+}
+
+/* ردیف توضیحات پایین کارت (Buy-ins… Net…) */
+.row :where(.label-muted, small, p){
+  color: var(--muted);
+  font-size: .95rem;
+}
+.row :where(.label-muted, small, p) b{
+  color: #fff;
+}
+
+/* موبایل خیلی باریک */
+@media (max-width: 420px){
+  .row { padding: 12px 14px; }
+  .row > :has(> button + button + button){ gap: .5rem; padding-right: 60px; }
+  .row > :has(> button + button + button) > button{ min-height: 38px; font-size: 15px; }
+  .row button[title*="Delete"],
+  .row button[aria-label*="Delete"],
+  .row button:has(svg[aria-hidden="true"]) { width: 36px; height: 36px; top: 12px; right: 10px; }
+}
