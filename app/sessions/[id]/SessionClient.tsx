@@ -302,9 +302,9 @@ const startedAtMs =
         <div className="mb-3 flex items-center gap-3">
           <div>Blind up in: <b>{tournamentCountdown ?? "--:--"}</b></div>
           <div>Blind level (min): <b>{session?.blind_level_minutes ?? 10}</b></div>
-          <button onClick={() => bumpBlind(+1)} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">＋</button>
-          <button onClick={() => bumpBlind(-1)} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">－</button>
-          <button onClick={toggleRunning} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">{running ? "Pause" : "Resume"}</button>
+          <button onClick={() => bumpBlind(+1)} disabled={isFinished} className="btn btn-ghost">＋</button>
+          <button onClick={() => bumpBlind(-1)} disabled={isFinished} className="btn btn-ghost">－</button>
+          <button onClick={toggleRunning} disabled={isFinished} className="btn btn-ghost">{running ? "Pause" : "Resume"}</button>
         </div>
       )}
 
@@ -312,7 +312,7 @@ const startedAtMs =
         <div className="mb-3 flex items-center gap-3">
           <div>Time left: <b>{cashgameCountdown ?? "--:--"}</b></div>
           <div>Duration (min): <b>{session?.duration_minutes ?? 0}</b></div>
-          <button onClick={toggleRunning} disabled={isFinished} className="px-2 py-1 rounded bg-neutral-700">{running ? "Pause" : "Resume"}</button>
+          <button onClick={toggleRunning} disabled={isFinished} className="btn btn-ghost">{running ? "Pause" : "Resume"}</button>
         </div>
       )}
 
@@ -321,7 +321,7 @@ const startedAtMs =
       )}
 
       <h2 className="font-semibold mb-2">Players</h2>
-      <ul className="space-y-3 mb-6">
+      <ul className="players-list space-y-3 mb-6">
         {players.map(p => {
           const r = perPlayer.get(p.id);
           const buy = r?.buy ?? 0;       // already negative
@@ -329,14 +329,14 @@ const startedAtMs =
           const out = r?.out ?? 0;       // positive
           const net = round2(out + buy + re);
           return (
-            <li key={p.id} className="border rounded p-3">
+            <li key={p.id} className="row player-card border rounded p-3">
               <div className="flex items-center justify-between">
                 <div className="font-medium">{p.name}</div>
                 <div className="flex items-center gap-2">
-                  <button disabled={isFinished} onClick={() => buyinFixed(p.id)}   className="bg-green-600 px-3 py-1 rounded">Buy-in</button>
-                  <button disabled={isFinished} onClick={() => rebuyPrompt(p.id)}  className="bg-blue-600  px-3 py-1 rounded">Rebuy</button>
-                  <button disabled={isFinished} onClick={() => cashoutPrompt(p.id)} className="bg-red-600   px-3 py-1 rounded">Cashout</button>
-                  <button disabled={isFinished} onClick={() => removePlayer(p.spId)} className="px-2 py-1 rounded bg-neutral-700" title="Remove">🗑️</button>
+                  <button disabled={isFinished} onClick={() => buyinFixed(p.id)}   className="btn btn-secondary">Buy-in</button>
+                  <button disabled={isFinished} onClick={() => rebuyPrompt(p.id)}  className="btn btn-secondary">Rebuy</button>
+                  <button disabled={isFinished} onClick={() => cashoutPrompt(p.id)} className="btn btn-secondary">Cashout</button>
+                  <button disabled={isFinished} onClick={() => removePlayer(p.spId)} className="btn btn-ghost" title="Remove">🗑️</button>
                 </div>
               </div>
               <div className="text-xs opacity-80 mt-2">
