@@ -32,8 +32,8 @@ const [session, setSession] = useState<SessionRow | null>(null);
     
 
 const durationMs =
-  (typeof session !== "undefined" && session?.duration_minutes != null
-    ? session.duration_minutes
+  (typeof session !== "undefined" && session?.duration_min != null
+    ? session.duration_min
     : 180) * 60000;
 
 const startedAtMs =
