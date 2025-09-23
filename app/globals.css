@@ -492,3 +492,38 @@ button[aria-label*="Delete"]{
 
 /* آیکن داخل دکمه‌ها کمی کوچک‌تر */
 button svg, button .icon { width: 16px; height: 16px; }
+
+/* === Player card: extend box to include trash icon area === */
+:root{
+  --card-extra-right: 64px;   /* فضای سمت راست برای آیکن سطل */
+}
+
+ /* فقط کارت‌هایی که داخل‌شان ردیف 3 دکمه داریم (Buy-in/Rebuy/Cashout) را هدف بگیر */
+.row:has(> :has(> button + button + button)){
+  position: relative;
+  /* کارت را از سمت راست کمی بزرگ‌تر کن تا آیکن سطل هم داخل باکس بیفتد */
+  margin-right: calc(var(--card-extra-right) * -1);
+  padding-right: calc(16px + var(--card-extra-right));
+}
+
+/* خود آیکن سطل داخل همین محدوده بماند (اگر مطلق شده) */
+.row:has(> :has(> button + button + button)) > button[title*="Delete"],
+.row:has(> :has(> button + button + button)) > button[aria-label*="Delete"]{
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  width: 40px; height: 40px;
+  padding: 0; border-radius: 12px;
+}
+
+/* موبایل خیلی باریک */
+@media (max-width: 420px){
+  :root{ --card-extra-right: 60px; }
+  .row:has(> :has(> button + button + button)){
+    padding-right: calc(12px + var(--card-extra-right));
+  }
+  .row:has(> :has(> button + button + button)) > button[title*="Delete"],
+  .row:has(> :has(> button + button + button)) > button[aria-label*="Delete"]{
+    top: 12px; right: 10px; width: 36px; height: 36px;
+  }
+}
