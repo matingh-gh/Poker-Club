@@ -26,3 +26,8 @@ export default function Home() {
     </section>
   );
 }
+
+{/* CTA: Create Session */}
+<div className="mt-6">
+  <a href="/sessions/new" className="btn btn-primary">Create Session</a>
+</div>
