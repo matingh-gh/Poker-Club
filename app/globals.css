@@ -432,3 +432,63 @@ a:has(svg) > svg { width: var(--icon-size); height: var(--icon-size); }
   .row button[aria-label*="Delete"],
   .row button:has(svg[aria-hidden="true"]) { width: 36px; height: 36px; top: 12px; right: 10px; }
 }
+
+/* === Generic three-action row + safe delete icon, no JSX changes === */
+
+/* متن دکمه‌ها هرگز به دو خط نشکند (Buy-in یک خط بماند) */
+button { white-space: nowrap; }
+
+/* هر ظرفی که دقیقا سه دکمهٔ هم‌سطح دارد را سه‌ستونه کن */
+:is(main, body, #__next)
+  :is(div, section, article, li, nav)
+  :has(> button + button + button):not(:has(> button:nth-child(4))) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .6rem;
+  align-items: center;
+  margin-bottom: .6rem;
+  padding-right: 64px; /* جا برای دکمهٔ سطل در راست */
+}
+
+/* خود دکمه‌های آن ردیف */
+:is(main, body, #__next)
+  :is(div, section, article, li, nav)
+  :has(> button + button + button):not(:has(> button:nth-child(4))) > button {
+  width: 100%;
+  justify-content: center;
+  min-height: 40px;
+  border-radius: 14px;
+  padding: .5rem .8rem;
+  font-weight: 600;
+}
+
+/* اگر داخل موبایل خیلی باریک شد */
+@media (max-width: 420px){
+  :is(main, body, #__next)
+    :is(div, section, article, li, nav)
+    :has(> button + button + button):not(:has(> button:nth-child(4))) > button {
+    min-height: 38px;
+    font-size: 15px;
+  }
+}
+
+/* هر کارتی که یک دکمهٔ سطل به صورت فرزند مستقیم دارد: relative + فضای راست */
+:is(div, section, article, li)
+  :is(&) {}
+
+/* موقعیت‌دهی خود دکمهٔ سطل (icon-only) */
+:is(div, section, article, li):has(> button[title*="Delete"], > button[aria-label*="Delete"]) {
+  position: relative;
+  padding-right: 64px;
+}
+button[title*="Delete"],
+button[aria-label*="Delete"]{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px; height: 40px; padding: 0;
+  border-radius: 12px;
+}
+
+/* آیکن داخل دکمه‌ها کمی کوچک‌تر */
+button svg, button .icon { width: 16px; height: 16px; }
