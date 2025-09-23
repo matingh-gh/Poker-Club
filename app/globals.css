@@ -242,3 +242,39 @@ tr:last-child td { border-bottom: 0; }
 
 /* Utility for numbers */
 .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* === Icon buttons & chip selection (mobile polish) === */
+/* آیکن‌های داخل دکمه‌ها کوچک و متناسب */
+.row button svg, .row button .icon { width: 18px; height: 18px; }
+
+/* دکمه‌هایی که فقط آیکن دارند */
+.row button:has(svg), .row button:has(.icon) {
+  padding: .4rem;
+  width: 40px; height: 40px;
+  border-radius: 12px;
+}
+
+/* دکمه‌های معمولی در کارت‌ها */
+.row button { padding: .55rem .9rem; border-radius: 12px; }
+
+/* موبایل خیلی کوچک */
+@media (max-width: 420px){
+  .row button { padding: .5rem .75rem; }
+  .row button:has(svg), .row button:has(.icon){ width: 36px; height: 36px; }
+}
+
+/* چیپ انتخاب بازیکن‌ها (New Session) — حالت انتخاب‌شده */
+button[aria-pressed="true"],
+button[aria-checked="true"],
+button[data-selected="true"],
+button.selected, .chip.is-selected {
+  background: var(--primary);
+  color: #fff;
+  border-color: rgba(255,255,255,0.16);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* چیپ‌های غیرفعال/ناتمام */
+button[disabled], button[aria-disabled="true"]{
+  opacity: .6;
+}
