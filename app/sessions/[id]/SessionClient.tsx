@@ -28,25 +28,25 @@ export default function SessionClient({ id }: { id: string }) {
   
   const router = useRouter();
 
-    const { remainingMs, status, pause, resume, setStatus } = useCountdown({
-  startedAt: startedAtMs,
-  durationMs,
-  initialStatus: (typeof session !== "undefined" && (session as any)?.status) ?? "running",
-});
+    
 const [session, setSession] = useState<SessionRow | null>(null);
 
+const durationMs =
+  (typeof session !== "undefined" && session?.duration_min != null
+    ? session.duration_min
+    : 180) * 60000;
+
 const startedAtMs =
-    (typeof session !== "undefined" && session?.started_at
-      ? new Date(session.started_at).getTime()
-      : Date.now());
+  (typeof session !== "undefined" && session?.started_at
+    ? new Date(session.started_at).getTime()
+    : Date.now());
+
+const [session, setSession] = useState<SessionRow | null>(null);
+
 
   
 
 
-const durationMs =
-    (typeof session !== "undefined" && session?.duration_min != null
-      ? session.duration_min
-      : 180) * 60000;
 
 
 
