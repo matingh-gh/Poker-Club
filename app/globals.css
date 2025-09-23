@@ -339,3 +339,33 @@ a:has(svg) > svg { width: var(--icon-size); height: var(--icon-size); }
     min-width: 0;  /* اجازهٔ جمع شدن آیتم‌ها */
   }
 }
+
+/* === Mobile action buttons polish (players cards) === */
+.row .btn,
+.row button{
+  white-space: nowrap;      /* جلوگیری از رفتن Buy-in به دو خط */
+  hyphens: none;
+  border-radius: 14px;
+  padding: .5rem .9rem;
+  min-height: 40px;         /* tap-target مناسب */
+  margin-right: .5rem;      /* فاصله بین دکمه‌ها */
+  margin-bottom: .5rem;     /* اجازه‌ی wrap تمیز وقتی جا کم است */
+}
+
+@media (max-width: 420px){
+  .row .btn,
+  .row button{
+    font-size: 15px;
+    padding: .5rem .8rem;
+    min-height: 38px;
+  }
+  /* فضای سمت راست برای آیکن سطل که معمولا absolute است */
+  .row{ padding-right: 64px; }
+}
+
+/* آیکن‌های داخل دکمه‌ها */
+.row button svg,
+.row button .icon{
+  width: 16px;
+  height: 16px;
+}
