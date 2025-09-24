@@ -5,6 +5,7 @@ import { useCountdown } from "@/lib/useCountdown";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
+import Link from "next/link";
 type SessionRow = {
   id: string;
   title: string | null;
@@ -367,6 +368,15 @@ const startedAtMs =
 
       {msg && <div className="text-green-400 text-sm mb-3">{msg}</div>}
       <button disabled={isFinished} onClick={finishSession} className="px-4 py-2 rounded bg-neutral-700">Finish Session</button>
+
+{/* CTA: show after finished */}
+{session?.status === "finished" && (
+  <div className="mt-4">
+    <Link href={`/sessions/${session?.id}/settlements`} className="btn btn-primary">
+      View settlements
+    </Link>
+  </div>
+)}
     </main>
   );
 }
