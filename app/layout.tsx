@@ -20,10 +20,10 @@ export const metadata: Metadata = {
       { url: "/favicon-16.png", sizes: "16x16", type: "image/png" }
     ],
     apple: [
-      { url: "/apple-icon-180.png?v=chip4", sizes: "180x180" },
-      { url: "/apple-icon-167.png?v=chip4", sizes: "167x167" },
-      { url: "/apple-icon-152.png?v=chip4", sizes: "152x152" },
-      { url: "/apple-icon-120.png?v=chip4", sizes: "120x120" }
+      { url: "/apple-icon-180.png?v=chip5", sizes: "180x180" },
+      { url: "/apple-icon-167.png?v=chip5", sizes: "167x167" },
+      { url: "/apple-icon-152.png?v=chip5", sizes: "152x152" },
+      { url: "/apple-icon-120.png?v=chip5", sizes: "120x120" }
     ]
   },
   appleWebApp: {
