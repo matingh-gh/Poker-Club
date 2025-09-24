@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 type Tx = {
@@ -41,7 +42,7 @@ function computeSettlements(netsByPlayer: { id: string; name: string; net: numbe
 }
 
 export default function SettlementsPage({ params }: { params: { id: string } }) {
-  const sessionId = params.id;
+  const { id: sessionId } = useParams<{ id: string }>();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
