@@ -46,3 +46,7 @@ public/*.bak_*
 # local backups
 **/*.bak_*
 _audit/
+
+# local audit archives
+poker-club-audit.zip
+_audit/

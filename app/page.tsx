@@ -1,4 +1,6 @@
-export default function Home() {
+
+      <BrandLogo />
+import BrandLogo from "../components/BrandLogo";export default function Home() {
   return (
     <section className="min-h-[70dvh] flex flex-col items-center justify-center gap-6 text-center relative">
       {/* subtle bg glow */}
