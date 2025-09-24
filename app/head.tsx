@@ -13,10 +13,7 @@ export default function Head() {
       {/* iOS standalone */}
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      <meta name="apple-mobile-web-app-title" content="Poker Club" />
-      <link rel="apple-touch-icon" href="/apple-icon.png" />
-
-      {/* Theme colors */}
+      <meta name="apple-mobile-web-app-title" content="Poker Club" />{/* Theme colors */}
       <meta name="theme-color" content="#0b0b0c" />
       <meta name="color-scheme" content="light dark" />
     </>
