@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: "Poker Club", template: "%s · Poker Club" },
   applicationName: "Poker Club",
-  manifest: "/manifest.webmanifest?v=ios-standalone-7",
+  manifest: "/manifest.webmanifest?v=ios-standalone-8",
   themeColor: "#0b0b0c",
   icons: {
     icon: [
@@ -20,14 +20,17 @@ export const metadata: Metadata = {
       { url: "/favicon-16.png", sizes: "16x16", type: "image/png" }
     ],
     apple: [
-      { url: "/apple-icon-180.png?v=chip2", sizes: "180x180" },
-      { url: "/apple-icon-167.png?v=chip2", sizes: "167x167" },
-      { url: "/apple-icon-152.png?v=chip2", sizes: "152x152" },
-      { url: "/apple-icon-120.png?v=chip2", sizes: "120x120" }
-    ],
-  }],
+      { url: "/apple-icon-180.png?v=chip3", sizes: "180x180" },
+      { url: "/apple-icon-167.png?v=chip3", sizes: "167x167" },
+      { url: "/apple-icon-152.png?v=chip3", sizes: "152x152" },
+      { url: "/apple-icon-120.png?v=chip3", sizes: "120x120" }
+    ]
   },
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Poker Club" },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Poker Club"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -35,9 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <header className="header-glass">
-          <div className="container" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"12px",padding:"12px 16px"}}>
-            
-            <nav style={{display:"flex",gap:"16px",}}>
+          <div
+            className="container"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", padding: "12px 16px" }}
+          >
+            <nav style={{ display: "flex", gap: "16px" }}>
               <Link href="/">Home</Link>
               <Link href="/players">Players</Link>
               <Link href="/sessions">Sessions</Link>
