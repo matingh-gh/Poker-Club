@@ -1,5 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
+import BrandLogo from "../components/BrandLogo";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -11,7 +13,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: "Poker Club", template: "%s · Poker Club" },
   applicationName: "Poker Club",
-  manifest: "/manifest.webmanifest?v=ios-standalone-4",
+  manifest: "/manifest.webmanifest?v=ios-standalone-5",
   themeColor: "#0b0b0c",
   icons: {
     icon: [
@@ -20,17 +22,27 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-icon.png" }],
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Poker Club",
-  },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Poker Club" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <header className="header-glass">
+          <div className="container" style={{display:"flex",alignItems:"center",gap:"12px",padding:"12px 16px"}}>
+            <BrandLogo />
+            <nav style={{display:"flex",gap:"16px",marginLeft:"auto"}}>
+              <Link href="/">Home</Link>
+              <Link href="/players">Players</Link>
+              <Link href="/sessions">Sessions</Link>
+              <Link href="/ranking">Ranking</Link>
+              <Link href="/sessions/new">New Session</Link>
+            </nav>
+          </div>
+        </header>
+        <main>{children}</main>
+      </body>
     </html>
   );
 }
