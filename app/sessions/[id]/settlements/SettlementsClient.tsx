@@ -3,24 +3,59 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-type Tx = {
-  player_id: string;
-  type: "buyin" | "rebuy" | "cashout";
-  amount: number;
-};
+type AnyRow = Record<string, any>;
 type Player = { id: string; name: string };
 
-function computeNets(txs: Tx[]): Record<string, number> {
+/** محاسبه‌ی خالص هر نفر از روی هر فرمتی از تراکنش */
+function txNet(row: AnyRow): number {
+  // مقدار اصلی
+  const amt =
+    Number(row.amount ?? row.value ?? row.qty ?? row.quantity ?? row.delta ?? 0) || 0;
+
+  // اگر delta وجود دارد، همان را برگردان
+  if (typeof row.delta === "number") return Number(row.delta);
+
+  // نوع عملیات از هر فیلدی که باشد
+  const kind = String(row.type ?? row.kind ?? row.action ?? "").toLowerCase();
+
+  // جهت عملیات (+/- , credit/debit)
+  const dir = String(row.direction ?? row.dir ?? "").toLowerCase();
+
+  // boolean cashout
+  const isCashout =
+    row.is_cashout === true ||
+    row.cashout === true ||
+    kind.includes("cash");
+
+  // قواعد:
+  if (dir === "+" || dir === "credit") return Math.round(amt);
+  if (dir === "-" || dir === "debit") return -Math.round(amt);
+
+  if (kind) {
+    if (kind.includes("cash")) return Math.round(amt);      // cashout/payout
+    if (kind.includes("rebuy") || kind.includes("re-buy")) return -Math.round(amt);
+    if (kind.includes("buy")) return -Math.round(amt);      // buyin
+  }
+
+  if (isCashout) return Math.round(amt);
+
+  // پیش‌فرض: هزینه (منفی)
+  return -Math.round(amt);
+}
+
+function computeNets(txs: AnyRow[]): Record<string, number> {
   const nets: Record<string, number> = {};
-  for (const t of txs) {
-    if (!nets[t.player_id]) nets[t.player_id] = 0;
-    if (t.type === "cashout") nets[t.player_id] += t.amount;
-    else nets[t.player_id] -= t.amount; // buyin/rebuy => پول خارج شده
+  for (const r of txs) {
+    const pid =
+      String(r.player_id ?? r.player ?? r.user_id ?? r.pid ?? "") || "";
+    if (!pid) continue;
+    if (!nets[pid]) nets[pid] = 0;
+    nets[pid] += txNet(r);
   }
   return nets;
 }
 
-/** انتقال‌ها با کمترین تعداد تراکنش (حریصانه) */
+/** انتقال‌ها با کمترین تعداد تراکنش (روش حریصانه) */
 function computeSettlements(netsByPlayer: { id: string; name: string; net: number }[]) {
   const creditors = [...netsByPlayer.filter(p => p.net > 0)].map(p => ({ ...p, left: p.net }));
   const debtors   = [...netsByPlayer.filter(p => p.net < 0)].map(p => ({ ...p, left: -p.net }));
@@ -46,7 +81,7 @@ export default function SettlementsClient({ sessionId }: { sessionId: string }) 
   const supabase = useMemo(() => createClient(supabaseUrl, supabaseKey), [supabaseUrl, supabaseKey]);
 
   const [players, setPlayers] = useState<Player[]>([]);
-  const [txs, setTxs] = useState<Tx[]>([]);
+  const [txs, setTxs] = useState<AnyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -61,16 +96,17 @@ export default function SettlementsClient({ sessionId }: { sessionId: string }) 
           .from("players")
           .select("id,name");
         if (perr) throw perr;
-        // تراکنش‌های سشن
+
+        // تراکنش‌های سشن (همه ستون‌ها تا وابسته به اسم نباشیم)
         const { data: tx, error: terr } = await supabase
           .from("transactions")
-          .select("player_id,type,amount")
+          .select("*")
           .eq("session_id", sessionId);
         if (terr) throw terr;
 
         if (!mounted) return;
         setPlayers((pls || []) as Player[]);
-        setTxs((tx || []) as Tx[]);
+        setTxs((tx || []) as AnyRow[]);
       } catch (e: any) {
         console.error(e);
         if (mounted) setErr(e?.message || "Failed to load settlements");
