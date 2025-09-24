@@ -3,9 +3,12 @@ export default function Head() {
     <>
       <title>Poker Club</title>
 
+      <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+
       {/* PWA basics */}
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-      <link rel="manifest" href="/manifest.webmanifest?v=20250923-1" />
+      <link rel="manifest" href="/manifest.webmanifest?v=icons-20250924-1" />
 
       {/* iOS standalone */}
       <meta name="apple-mobile-web-app-capable" content="yes" />
