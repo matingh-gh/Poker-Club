@@ -527,3 +527,16 @@ button svg, button .icon { width: 16px; height: 16px; }
     top: 12px; right: 10px; width: 36px; height: 36px;
   }
 }
+
+/* === Brand (minimal) === */
+.brand-logo{
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-weight: 700; letter-spacing: -0.01em; text-decoration: none; color: #fff;
+}
+.brand-logo:hover{ text-decoration: none; opacity: .95; }
+.brand-img{
+  width: 28px; height: 28px; border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+.brand-text{ font-size: 1.05rem; color: #fff; }
+.header-glass .brand-logo{ margin-right: .75rem; }
