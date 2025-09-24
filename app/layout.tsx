@@ -12,14 +12,20 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: "Poker Club", template: "%s · Poker Club" },
   applicationName: "Poker Club",
-  manifest: "/manifest.webmanifest?v=ios-standalone-6",
+  manifest: "/manifest.webmanifest?v=ios-standalone-7",
   themeColor: "#0b0b0c",
   icons: {
     icon: [
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" }
     ],
-    apple: [{ url: "/apple-icon.png" }],
+    apple: [
+      { url: "/apple-icon-180.png?v=chip2", sizes: "180x180" },
+      { url: "/apple-icon-167.png?v=chip2", sizes: "167x167" },
+      { url: "/apple-icon-152.png?v=chip2", sizes: "152x152" },
+      { url: "/apple-icon-120.png?v=chip2", sizes: "120x120" }
+    ],
+  }],
   },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Poker Club" },
 };
