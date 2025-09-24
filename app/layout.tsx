@@ -1,31 +1,36 @@
-import RegisterSW from "@/components/RegisterSW";
-import type { Metadata } from "next";
 import "./globals.css";
-import Nav from "@/components/Nav";
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0b0b0c",
+};
 
 export const metadata: Metadata = {
-  title: "Poker App",
-  description: "Home poker tracking app",
+  title: { default: "Poker Club", template: "%s · Poker Club" },
+  applicationName: "Poker Club",
+  manifest: "/manifest.webmanifest?v=ios-standalone-4",
+  themeColor: "#0b0b0c",
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Poker Club",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    \1
-  <head>
-      <!-- iOS standalone / PWA -->
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-title" content="Poker Club" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      <link rel="apple-touch-icon" href="/apple-icon.png" />
-      <link rel="manifest" href="/manifest.webmanifest?v=ios-standalone-3" />
-      <meta name="theme-color" content="#0b0b0c" />
-      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  </head>
-      <body className="min-h-dvh bg-black text-white">
-        <Nav />
-        <main className="max-w-4xl mx-auto px-4">{children}</main>
-        <RegisterSW />
-    </body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
   );
 }
