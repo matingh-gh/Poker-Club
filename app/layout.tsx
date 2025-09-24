@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: "Poker Club", template: "%s · Poker Club" },
   applicationName: "Poker Club",
-  manifest: "/manifest.webmanifest?v=ios-standalone-13",
+  manifest: "/manifest.webmanifest?v=ios-standalone-14",
   themeColor: "#0b0b0c",
   icons: {
     icon: [
